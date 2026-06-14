@@ -658,12 +658,12 @@ async function downloadPDF() {
       height:          'auto',
       maxWidth:        'none',
       overflow:        'visible',
-      background:      '#FAF8F4',
-      backgroundColor: '#FAF8F4',
+      background:      '#ffffff',
+      backgroundColor: '#ffffff',
       padding:         '40px 44px',
       boxSizing:       'border-box',
       fontFamily:      'Georgia, serif',
-      color:           '#4A4A4A',
+      color:           '#1A1A1A',
       boxShadow:       'none',
       borderRadius:    '0',
       zIndex:          '-1',
@@ -679,51 +679,51 @@ async function downloadPDF() {
 
     // 4. Corrige cores dos elementos de cabeçalho
     const sheetHead = clone.querySelector('.sheet-head');
-    if (sheetHead) { sheetHead.style.borderBottom = '2px solid #7FA8A4'; }
+    if (sheetHead) { sheetHead.style.borderBottom = '2px solid #2A6B67'; }
 
     const sheetLogo = clone.querySelector('.sheet-logo');
     if (sheetLogo) {
-      sheetLogo.style.background = '#7FA8A4';
+      sheetLogo.style.background = '#2A6B67';
       sheetLogo.style.color      = '#ffffff';
     }
 
     const schoolName = clone.querySelector('.sheet-school .name');
-    if (schoolName) { schoolName.style.color = '#7FA8A4'; }
+    if (schoolName) { schoolName.style.color = '#2A6B67'; }
 
     const govInfo = clone.querySelector('.sheet-school .gov');
-    if (govInfo) { govInfo.style.color = '#8C887F'; }
+    if (govInfo) { govInfo.style.color = '#4A4842'; }
 
     const titleH2 = clone.querySelector('.sheet-title h2');
-    if (titleH2) { titleH2.style.color = '#7FA8A4'; }
+    if (titleH2) { titleH2.style.color = '#2A6B67'; }
 
     const studentPref = clone.querySelector('.sheet-student .pref');
-    if (studentPref) { studentPref.style.color = '#8C887F'; }
+    if (studentPref) { studentPref.style.color = '#4A4842'; }
 
     // 5. Corrige meta-grid
     const metaGrid = clone.querySelector('.meta-grid');
     if (metaGrid) {
-      metaGrid.style.backgroundColor = '#F1EEE7';
+      metaGrid.style.backgroundColor = '#E8E4DC';
       metaGrid.style.borderRadius    = '6px';
       metaGrid.style.padding         = '12px';
     }
 
     clone.querySelectorAll('.meta-cell .label').forEach(el => {
-      el.style.color         = '#8C887F';
+      el.style.color         = '#4A4842';
       el.style.fontSize      = '9px';
-      el.style.fontWeight    = '600';
+      el.style.fontWeight    = '700';
       el.style.textTransform = 'uppercase';
       el.style.letterSpacing = '0.04em';
     });
 
     clone.querySelectorAll('.meta-cell .value').forEach(el => {
-      el.style.color      = '#4A4A4A';
+      el.style.color      = '#1A1A1A';
       el.style.fontSize   = '12px';
       el.style.fontFamily = 'Georgia, serif';
     });
 
     // 6. Corrige seções
     clone.querySelectorAll('.section .sec-label').forEach(el => {
-      el.style.color         = '#6B928E';
+      el.style.color         = '#1F5956';
       el.style.fontSize      = '9px';
       el.style.fontWeight    = '700';
       el.style.textTransform = 'uppercase';
@@ -731,7 +731,7 @@ async function downloadPDF() {
     });
 
     clone.querySelectorAll('.section .sec-body').forEach(el => {
-      el.style.color      = '#4A4A4A';
+      el.style.color      = '#1A1A1A';
       el.style.fontSize   = '11.5px';
       el.style.lineHeight = '1.8';
       el.style.fontFamily = 'Georgia, serif';
@@ -739,15 +739,15 @@ async function downloadPDF() {
 
     // 7. Corrige rodapé e assinaturas
     const footDate = clone.querySelector('.foot-date');
-    if (footDate) { footDate.style.color = '#8C887F'; }
+    if (footDate) { footDate.style.color = '#4A4842'; }
 
     clone.querySelectorAll('.sign .line').forEach(el => {
-      el.style.borderTop    = '1px solid #B5AFA3';
+      el.style.borderTop    = '1px solid #7A7570';
       el.style.marginBottom = '5px';
     });
 
     clone.querySelectorAll('.sign .who').forEach(el => {
-      el.style.color    = '#8C887F';
+      el.style.color    = '#4A4842';
       el.style.fontSize = '10px';
     });
 
@@ -758,7 +758,7 @@ async function downloadPDF() {
       top:        '-99999px',
       left:       '-99999px',
       width:      '794px',
-      background: '#FAF8F4',
+      background: '#ffffff',
       zIndex:     '-1',
     });
     container.appendChild(clone);
@@ -772,7 +772,7 @@ async function downloadPDF() {
       scale:           3,
       useCORS:         true,
       allowTaint:      true,
-      backgroundColor: '#FAF8F4',
+      backgroundColor: '#ffffff',
       logging:         false,
       windowWidth:     794,
       windowHeight:    clone.scrollHeight,
