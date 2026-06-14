@@ -55,7 +55,7 @@ Formato do JSON:
 Use linguagem formal, empática e construtiva. Nunca use linguagem negativa — transforme dificuldades em áreas de desenvolvimento.`;
 
 const DOM = {
-  tabsBar:       () => document.getElementById('tabsBar'),
+  tabsBar:      () => document.getElementById('tabsBar'),
   chatScroll:    () => document.getElementById('chatScroll'),
   composerInput: () => document.getElementById('composerInput'),
   composerBox:   () => document.getElementById('composerBox'),
