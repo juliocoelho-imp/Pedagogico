@@ -35,10 +35,7 @@ const API_CONFIG = {
 function getCurrentPeriod() {
   const month = new Date().getMonth() + 1;
   const year  = new Date().getFullYear();
-  if (month <= 3)  return `1º Bimestre ${year}`;
-  if (month <= 6)  return `2º Bimestre ${year}`;
-  if (month <= 9)  return `3º Bimestre ${year}`;
-  return `4º Bimestre ${year}`;
+  return month <= 6 ? `1º Semestre ${year}` : `2º Semestre ${year}`;
 }
 
 function getSystemPrompt() {
@@ -56,7 +53,7 @@ Formato do JSON:
   "studentName": "Nome completo do aluno",
   "class": "Ex: 3º Ano A",
   "age": "Ex: 8 anos",
-  "period": "${getCurrentPeriod()}",
+  "period": "Ex: 1º Semestre 2026",
   "teacher": "A preencher",
   "geral": "Parágrafo sobre desenvolvimento geral (3-4 frases formais)",
   "academico": "Parágrafo sobre desempenho acadêmico (3-4 frases formais)",
