@@ -455,10 +455,6 @@ function sheetHTML(r) {
         </div>
         <div class="sign">
           <div class="line"></div>
-          <div class="who">Assinatura da Direção</div>
-        </div>
-        <div class="sign">
-          <div class="line"></div>
           <div class="who">Assinatura dos Pais/Responsáveis</div>
         </div>
       </div>
@@ -646,105 +642,191 @@ async function downloadPDF() {
   collectEdits();
   showToast('Gerando PDF…');
 
-  const page = DOM.pdfStage().querySelector('.sheet');
-  if (!page) { showToast('Documento não encontrado.', true); return; }
-
-  // Guarda estilos originais para restaurar depois
-  const originalStyles = {
-    maxWidth: page.style.maxWidth,
-    width:    page.style.width,
-    height:   page.style.height,
-    overflow: page.style.overflow,
-    position: page.style.position,
-  };
-
   try {
-    // 1. Expande a folha para capturar o conteúdo completo sem corte
-    page.style.maxWidth = 'none';
-    page.style.width    = '794px';   // largura A4 a 96 DPI
-    page.style.height   = 'auto';
-    page.style.overflow = 'visible';
-    page.style.position = 'relative';
+    const page = DOM.pdfStage().querySelector('.sheet');
+    if (!page) { showToast('Documento não encontrado.', true); return; }
 
-    // 2. Aguarda o browser re-renderizar
-    await new Promise(resolve => setTimeout(resolve, 120));
+    // 1. Clona a folha para não alterar o DOM original
+    const clone = page.cloneNode(true);
 
-    // 3. Captura em alta resolução (3x ≈ 288 DPI)
-    const canvas = await html2canvas(page, {
-      scale: 3,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      windowWidth:  page.scrollWidth,
-      windowHeight: page.scrollHeight,
+    // 2. Estilos inline no clone — valores concretos, sem var()
+    Object.assign(clone.style, {
+      position:        'fixed',
+      top:             '-99999px',
+      left:            '-99999px',
+      width:           '794px',
+      height:          'auto',
+      maxWidth:        'none',
+      overflow:        'visible',
+      background:      '#FAF8F4',
+      backgroundColor: '#FAF8F4',
+      padding:         '40px 44px',
+      boxSizing:       'border-box',
+      fontFamily:      'Georgia, serif',
+      color:           '#4A4A4A',
+      boxShadow:       'none',
+      borderRadius:    '0',
+      zIndex:          '-1',
     });
 
-    // 4. Cria o PDF A4
+    // 3. Garante que fundos transparentes não virem preto
+    clone.querySelectorAll('*').forEach(el => {
+      const bg = el.style.backgroundColor;
+      if (!bg || bg === 'rgba(0, 0, 0, 0)') {
+        el.style.backgroundColor = 'transparent';
+      }
+    });
+
+    // 4. Corrige cores dos elementos de cabeçalho
+    const sheetHead = clone.querySelector('.sheet-head');
+    if (sheetHead) { sheetHead.style.borderBottom = '2px solid #7FA8A4'; }
+
+    const sheetLogo = clone.querySelector('.sheet-logo');
+    if (sheetLogo) {
+      sheetLogo.style.background = '#7FA8A4';
+      sheetLogo.style.color      = '#ffffff';
+    }
+
+    const schoolName = clone.querySelector('.sheet-school .name');
+    if (schoolName) { schoolName.style.color = '#7FA8A4'; }
+
+    const govInfo = clone.querySelector('.sheet-school .gov');
+    if (govInfo) { govInfo.style.color = '#8C887F'; }
+
+    const titleH2 = clone.querySelector('.sheet-title h2');
+    if (titleH2) { titleH2.style.color = '#7FA8A4'; }
+
+    const studentPref = clone.querySelector('.sheet-student .pref');
+    if (studentPref) { studentPref.style.color = '#8C887F'; }
+
+    // 5. Corrige meta-grid
+    const metaGrid = clone.querySelector('.meta-grid');
+    if (metaGrid) {
+      metaGrid.style.backgroundColor = '#F1EEE7';
+      metaGrid.style.borderRadius    = '6px';
+      metaGrid.style.padding         = '12px';
+    }
+
+    clone.querySelectorAll('.meta-cell .label').forEach(el => {
+      el.style.color         = '#8C887F';
+      el.style.fontSize      = '9px';
+      el.style.fontWeight    = '600';
+      el.style.textTransform = 'uppercase';
+      el.style.letterSpacing = '0.04em';
+    });
+
+    clone.querySelectorAll('.meta-cell .value').forEach(el => {
+      el.style.color      = '#4A4A4A';
+      el.style.fontSize   = '12px';
+      el.style.fontFamily = 'Georgia, serif';
+    });
+
+    // 6. Corrige seções
+    clone.querySelectorAll('.section .sec-label').forEach(el => {
+      el.style.color         = '#6B928E';
+      el.style.fontSize      = '9px';
+      el.style.fontWeight    = '700';
+      el.style.textTransform = 'uppercase';
+      el.style.letterSpacing = '0.08em';
+    });
+
+    clone.querySelectorAll('.section .sec-body').forEach(el => {
+      el.style.color      = '#4A4A4A';
+      el.style.fontSize   = '11.5px';
+      el.style.lineHeight = '1.8';
+      el.style.fontFamily = 'Georgia, serif';
+    });
+
+    // 7. Corrige rodapé e assinaturas
+    const footDate = clone.querySelector('.foot-date');
+    if (footDate) { footDate.style.color = '#8C887F'; }
+
+    clone.querySelectorAll('.sign .line').forEach(el => {
+      el.style.borderTop    = '1px solid #B5AFA3';
+      el.style.marginBottom = '5px';
+    });
+
+    clone.querySelectorAll('.sign .who').forEach(el => {
+      el.style.color    = '#8C887F';
+      el.style.fontSize = '10px';
+    });
+
+    // 8. Insere o clone num container isolado fora da tela
+    const container = document.createElement('div');
+    Object.assign(container.style, {
+      position:   'fixed',
+      top:        '-99999px',
+      left:       '-99999px',
+      width:      '794px',
+      background: '#FAF8F4',
+      zIndex:     '-1',
+    });
+    container.appendChild(clone);
+    document.body.appendChild(container);
+
+    // 9. Aguarda fonts e re-render
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // 10. Captura com html2canvas
+    const canvas = await html2canvas(clone, {
+      scale:           3,
+      useCORS:         true,
+      allowTaint:      true,
+      backgroundColor: '#FAF8F4',
+      logging:         false,
+      windowWidth:     794,
+      windowHeight:    clone.scrollHeight,
+      width:           794,
+      height:          clone.scrollHeight,
+    });
+
+    // 11. Remove o clone do DOM
+    document.body.removeChild(container);
+
+    // 12. Gera o PDF em A4
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({
       orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
+      unit:        'mm',
+      format:      'a4',
+      compress:    true,
     });
 
-    const pageWidthMM  = 210;
-    const pageHeightMM = 297;
+    const pageW = 210;
+    const pageH = 297;
+    const imgW  = pageW;
+    const imgH  = (canvas.height * imgW) / canvas.width;
 
-    // 5. Ajusta a imagem para caber em A4 sem perder proporção
-    const imgWidthMM  = pageWidthMM;
-    const imgHeightMM = (canvas.height * imgWidthMM) / canvas.width;
-
-    if (imgHeightMM <= pageHeightMM) {
-      // Cabe em página única — centraliza verticalmente
-      const yOffset = (pageHeightMM - imgHeightMM) / 2;
+    if (imgH <= pageH) {
       pdf.addImage(
-        canvas.toDataURL('image/jpeg', 0.97),
-        'JPEG',
-        0,
-        yOffset > 0 ? yOffset : 0,
-        imgWidthMM,
-        imgHeightMM,
-        undefined,
-        'FAST'
+        canvas.toDataURL('image/jpeg', 0.98),
+        'JPEG', 0, 0, imgW, imgH,
+        undefined, 'FAST'
       );
     } else {
-      // Conteúdo maior que A4 — escala para página única
-      const scale   = pageHeightMM / imgHeightMM;
-      const fittedW = imgWidthMM  * scale;
-      const fittedH = pageHeightMM;
-      const xOffset = (pageWidthMM - fittedW) / 2;
+      const ratio   = pageH / imgH;
+      const fittedW = imgW * ratio;
+      const xOffset = (pageW - fittedW) / 2;
       pdf.addImage(
-        canvas.toDataURL('image/jpeg', 0.97),
-        'JPEG',
-        xOffset,
-        0,
-        fittedW,
-        fittedH,
-        undefined,
-        'FAST'
+        canvas.toDataURL('image/jpeg', 0.98),
+        'JPEG', xOffset, 0, fittedW, pageH,
+        undefined, 'FAST'
       );
     }
 
-    // 6. Salva com nome limpo (sem acentos)
-    const safeName = s.name.toLowerCase().normalize('NFD')
+    // 13. Salva com nome limpo (sem acentos)
+    const safeName = s.name
+      .toLowerCase()
+      .normalize('NFD')
       .replace(/[̀-ͯ]/g, '')
       .replace(/\s+/g, '-');
-    const fileName = `relatorio-${safeName}.pdf`;
-    pdf.save(fileName);
-    showToast(`PDF baixado: ${fileName}`);
+
+    pdf.save(`relatorio-${safeName}.pdf`);
+    showToast(`PDF gerado com sucesso!`);
 
   } catch (err) {
     console.error('Erro ao gerar PDF:', err);
-    showToast('Erro ao gerar PDF. Tente novamente.', true);
-  } finally {
-    // 7. Restaura os estilos originais em qualquer cenário
-    page.style.maxWidth = originalStyles.maxWidth;
-    page.style.width    = originalStyles.width;
-    page.style.height   = originalStyles.height;
-    page.style.overflow = originalStyles.overflow;
-    page.style.position = originalStyles.position;
+    showToast('Erro ao gerar PDF. Veja o console para detalhes.', true);
   }
 }
 
