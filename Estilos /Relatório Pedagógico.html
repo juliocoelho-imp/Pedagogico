@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sistema Pedagógico de Relatórios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue-deep: #7FA8A4;      /* Primária — verde sálvia (botões / destaques) */
+    --blue-inst: #6B928E;      /* Primária em tom escuro — texto/links legíveis */
+    --secondary: #AFC8E8;      /* Secundária — azul claro pedagógico (menus / ícones) */
+    --blue-ice: #F1EEE7;       /* Cards / áreas — bege claro */
+    --green: #7FA8A4;          /* Ação principal = primária */
+    --green-hover: #6B928E;
+    --green-soft: #EAF6EF;
+    --success: #A8D5BA;        /* Sucesso / concluído — verde pastel */
+    --success-text: #3F7A5A;
+    --cream: #FAF8F4;          /* Fundo principal — off-white quente */
+    --white: #FFFFFF;
+    --text: #4A4A4A;           /* Texto principal — cinza escuro suave */
+    --text-2: #8C887F;
+    --border: #E5E0D8;
+    --star: #F5A623;
+    --field-hover: #F6F3EE;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    background: var(--blue-ice);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ───────────────────────── HEADER ───────────────────────── */
+  .app-header {
+    flex: 0 0 48px;
+    height: 48px;
+    background: var(--blue-deep);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    z-index: 30;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand .logo-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .brand h1 {
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .header-active {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.62);
+  }
+  .header-active .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #FFFFFF;
+  }
+  .header-active strong { color: #fff; font-weight: 500; }
+
+  /* ───────────────────────── SPLIT ───────────────────────── */
+  .split { flex: 1; display: flex; min-height: 0; }
+
+  .panel-left {
+    flex: 0 0 42%;
+    max-width: 42%;
+    background: var(--cream);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .panel-right {
+    flex: 1;
+    background: var(--blue-ice);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* ───────────────────────── TABS ───────────────────────── */
+  .tabs-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 10px 14px 0;
+    background: var(--cream);
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .tab {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px 10px;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    background: #EDE8DF;
+    color: var(--text-2);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: var(--cream);
+    color: var(--blue-deep);
+    font-weight: 600;
+    border-bottom: 1px solid var(--cream);
+    box-shadow: 0 -2px 0 var(--blue-deep) inset;
+  }
+  .tab .tab-avatar {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--blue-deep);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .tab.active .tab-avatar { background: var(--blue-deep); }
+  .tab-add {
+    flex: 0 0 auto;
+    width: 34px; height: 34px;
+    border: 1.5px dashed #C9C0B2;
+    border-radius: 10px 10px 0 0;
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    top: 1px; position: relative;
+    transition: border-color .15s, color .15s;
+  }
+  .tab-add:hover { border-color: var(--blue-deep); color: var(--blue-deep); }
+  .tabs-divider { height: 1px; background: var(--border); }
+
+  /* ───────────────────────── CHAT ───────────────────────── */
+  .chat-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 22px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .msg { display: flex; max-width: 88%; animation: msgIn .22s ease; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .msg.assistant { align-self: flex-start; }
+  .msg.teacher { align-self: flex-end; }
+  .bubble {
+    font-size: 13.5px;
+    line-height: 1.55;
+    padding: 11px 14px;
+    white-space: pre-wrap;
+  }
+  .msg.assistant .bubble {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px 12px 12px 2px;
+    color: var(--text);
+  }
+  .msg.teacher .bubble {
+    background: var(--blue-deep);
+    color: #fff;
+    border-radius: 12px 12px 2px 12px;
+  }
+  .msg .meta {
+    font-size: 10px;
+    color: var(--text-2);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+  .msg.assistant .avatar {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--blue-deep); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto; margin-right: 9px;
+  }
+  .msg.assistant .stack { display: flex; flex-direction: column; }
+
+  /* generating badge */
+  .gen-badge {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--green-soft);
+    border: 1px solid #CFE0DE;
+    color: var(--green-hover);
+    border-radius: 999px;
+    padding: 8px 15px 8px 13px;
+    font-size: 12.5px;
+    font-weight: 500;
+    animation: msgIn .22s ease, badgePulse 2s ease-in-out infinite;
+  }
+  @keyframes badgePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(127,168,164,0); } 50% { box-shadow: 0 0 0 4px rgba(127,168,164,0.10); } }
+  .gen-dots { display: inline-flex; gap: 4px; }
+  .gen-dots i {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    animation: dotBounce 1.2s infinite ease-in-out;
+  }
+  .gen-dots i:nth-child(2) { animation-delay: .2s; }
+  .gen-dots i:nth-child(3) { animation-delay: .4s; }
+  @keyframes dotBounce { 0%,60%,100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+  /* composer */
+  .composer {
+    flex: 0 0 auto;
+    padding: 12px 18px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--cream);
+  }
+  .composer-box {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+    padding: 6px 6px 6px 14px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .composer-box.focused {
+    border-color: var(--blue-deep);
+    box-shadow: 0 0 0 3px rgba(127,168,164,0.20);
+  }
+  .composer textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text);
+    background: transparent;
+    padding: 7px 0;
+    max-height: 130px;
+  }
+  .composer textarea::placeholder { color: var(--text-2); }
+  .send-btn {
+    flex: 0 0 auto;
+    width: 38px; height: 38px;
+    border: none;
+    border-radius: 8px;
+    background: var(--blue-deep);
+    color: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, transform .08s;
+  }
+  .send-btn:hover { background: var(--blue-inst); }
+  .send-btn:active { transform: scale(0.94); }
+  .send-btn:disabled { opacity: .4; cursor: default; transform: none; background: var(--blue-deep); }
+  .composer-hint {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-2);
+    display: flex; gap: 6px; align-items: center;
+  }
+  .composer-hint kbd {
+    font-family: var(--sans);
+    font-size: 10px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text-2);
+  }
+
+  /* ───────────────────────── PDF TOOLBAR ───────────────────────── */
+  .pdf-toolbar {
+    flex: 0 0 auto;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: rgba(255,255,255,0.55);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+  }
+  .pdf-toolbar .tb-left { display: flex; align-items: center; gap: 11px; }
+  .pdf-badge {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue-inst);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 3px 7px;
+  }
+  .pdf-toolbar .tb-name { font-size: 13.5px; font-weight: 600; color: var(--blue-deep); }
+  .pdf-toolbar .tb-sub { font-size: 11.5px; color: var(--text-2); }
+  .tb-right { display: flex; align-items: center; gap: 9px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 8px 13px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    transition: background .15s, border-color .15s, transform .08s;
+  }
+  .btn:hover { background: #fff; border-color: #D6CFC2; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--green-hover); border-color: var(--green-hover); }
+  .btn:disabled { opacity: .45; cursor: default; transform: none; }
+
+  /* ───────────────────────── PDF STAGE ───────────────────────── */
+  .pdf-stage {
+    flex: 1;
+    overflow-y: auto;
+    padding: 34px 24px 60px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .sheet {
+    width: 100%;
+    max-width: 480px;
+    background: var(--white);
+    padding: 42px 44px 38px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    color: var(--text);
+    min-height: 678px; /* ~A4 ratio relative to 480 */
+    position: relative;
+  }
+  .sheet.appear { animation: sheetIn .24s ease; }
+  @keyframes sheetIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  /* paper grain */
+  .sheet::before {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(0,0,0,0.018) 1px, transparent 1px);
+    background-size: 4px 4px;
+    mix-blend-mode: multiply;
+  }
+
+  .sheet-head {
+    display: flex; align-items: center; gap: 13px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--blue-deep);
+  }
+  .sheet-logo {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--blue-deep);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: bold;
+    flex: 0 0 auto;
+  }
+  .sheet-school { display: flex; flex-direction: column; gap: 2px; }
+  .sheet-school .name { font-family: var(--serif); font-size: 14px; font-weight: bold; color: var(--blue-deep); line-height: 1.2; }
+  .sheet-school .gov { font-size: 9px; color: var(--text-2); letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .sheet-title {
+    text-align: center;
+    margin: 22px 0 4px;
+  }
+  .sheet-title h2 {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--blue-deep);
+    letter-spacing: 0.01em;
+  }
+  .sheet-student {
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .sheet-student .pref { color: var(--text-2); font-size: 11px; display: block; letter-spacing: 0.06em; text-transform: uppercase; font-family: var(--sans); margin-bottom: 3px; }
+
+  /* metadata grid */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 26px;
+  }
+  .meta-cell {
+    background: #EAF1FA;
+    padding: 10px 13px;
+  }
+  .meta-cell .label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+    margin-bottom: 3px;
+  }
+  .meta-cell .value { font-family: var(--serif); font-size: 12px; color: var(--text); }
+
+  /* sections */
+  .section { margin-bottom: 22px; }
+  .section .sec-label {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--blue-inst);
+    margin-bottom: 7px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .section .sec-label::before {
+    content: ""; width: 14px; height: 2px; background: var(--blue-deep); display: inline-block;
+  }
+  .sec-body {
+    font-family: var(--serif);
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text);
+    text-align: justify;
+  }
+
+  /* editable fields */
+  .editable {
+    border-radius: 4px;
+    outline: none;
+    transition: background .1s, box-shadow .12s;
+    cursor: text;
+    padding: 1px 3px;
+    margin: -1px -3px;
+  }
+  .editable:hover { background: var(--field-hover); }
+  .editable:focus {
+    background: var(--blue-ice);
+    box-shadow: 0 0 0 2px rgba(127,168,164,0.45);
+  }
+
+  /* evaluation / stars */
+  .eval-block {
+    background: #EAF1FA;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+  }
+  .eval-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 0;
+  }
+  .eval-row + .eval-row { border-top: 1px solid var(--border); }
+  .eval-row .crit { font-family: var(--sans); font-size: 11px; color: var(--text); font-weight: 500; }
+  .stars { display: flex; gap: 3px; }
+  .star {
+    cursor: pointer;
+    color: #D8D2C6;
+    transition: transform .12s, color .12s;
+    display: inline-flex;
+  }
+  .star:hover { transform: scale(1.2); }
+  .star.on { color: var(--star); }
+
+  /* footer / signature */
+  .sheet-foot {
+    margin-top: 32px;
+    padding-top: 8px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .sign {
+    flex: 1;
+    text-align: center;
+  }
+  .sign .line { border-top: 1px solid #B5AFA3; margin-bottom: 5px; }
+  .sign .who { font-size: 10px; color: var(--text-2); font-family: var(--sans); }
+  .sign .who b { display: block; color: var(--text); font-family: var(--serif); font-size: 11.5px; font-weight: bold; margin-bottom: 1px; }
+  .foot-date { font-size: 10px; color: var(--text-2); white-space: nowrap; font-family: var(--sans); text-align: right; }
+
+  /* ───────────────────────── SKELETON ───────────────────────── */
+  .skel-line {
+    height: 11px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #ECE7DE 25%, #F6F3EC 50%, #ECE7DE 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.3s infinite;
+    margin-bottom: 11px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .skel-center { display:flex; flex-direction:column; align-items:center; }
+
+  /* ───────────────────────── EMPTY ───────────────────────── */
+  .empty {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 40px;
+    color: var(--text-2);
+  }
+  .empty .ill {
+    width: 92px; height: 92px;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--blue-deep);
+    margin-bottom: 20px;
+    box-shadow: 0 4px 14px rgba(127,168,164,0.12);
+  }
+  .empty h3 { font-family: var(--serif); font-size: 18px; color: var(--blue-deep); margin-bottom: 8px; font-weight: bold; }
+  .empty p { font-size: 13px; line-height: 1.6; max-width: 320px; }
+  .empty .arrow { margin-top: 18px; font-size: 12px; color: var(--blue-inst); display: flex; align-items: center; gap: 6px; font-weight: 500; }
+
+  /* ───────────────────────── TOAST ───────────────────────── */
+  .toast-wrap {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: flex; flex-direction: column; gap: 8px;
+    align-items: center;
+    pointer-events: none;
+  }
+  .toast {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--green-soft);
+    border: 1px solid var(--success);
+    color: var(--success-text);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 6px 20px rgba(47,133,90,0.14);
+    animation: toastIn .25s ease;
+  }
+  .toast.out { animation: toastOut .25s ease forwards; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+  @keyframes toastOut { to { opacity: 0; transform: translateY(-10px); } }
+
+  /* scrollbars */
+  ::-webkit-scrollbar { width: 10px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: rgba(113,128,150,0.3); border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(113,128,150,0.5); background-clip: padding-box; }
+
+  .hidden { display: none !important; }
+
+  /* ───────────────────────── RESPONSIVE ───────────────────────── */
+  @media (max-width: 880px) {
+    body { overflow: auto; }
+    .split { flex-direction: column; }
+    .panel-left { flex: none; max-width: 100%; width: 100%; height: 56vh; }
+    .panel-right { height: 70vh; }
+  }
+
+  /* ───────────────────────── PRINT ───────────────────────── */
+  @media print {
+    body { overflow: visible; background: #fff; }
+    .app-header, .panel-left, .pdf-toolbar, .toast-wrap { display: none !important; }
+    .panel-right, .app, .split { display: block; height: auto; background: #fff; }
+    .pdf-stage { padding: 0; display: block; overflow: visible; }
+    .sheet { box-shadow: none; max-width: 100%; padding: 0; }
+    .sheet::before { display: none; }
+    .editable:hover, .editable:focus { background: transparent; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HEADER -->
+  <header class="app-header" style="background-color: rgb(117, 149, 146)">
+    <div class="brand">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </span>
+      <h1>Sistema Pedagógico de Relatórios</h1>
+    </div>
+    <div class="header-active" id="headerActive">
+      <span class="dot"></span>
+      <span>Aluno ativo: <strong id="headerStudent">—</strong></span>
+    </div>
+  </header>
+
+  <!-- SPLIT -->
+  <div class="split">
+    <!-- LEFT: CHAT -->
+    <section class="panel-left">
+      <div class="tabs-bar" id="tabsBar"></div>
+      <div class="tabs-divider"></div>
+      <div class="chat-scroll" id="chatScroll"></div>
+      <div class="composer">
+        <div class="composer-box" id="composerBox">
+          <textarea id="composerInput" rows="1" placeholder="Descreva o aluno: personalidade, desempenho, pontos fortes e desafios…"></textarea>
+          <button class="send-btn" id="sendBtn" title="Gerar relatório" aria-label="Gerar relatório">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
+        <div class="composer-hint">
+          <kbd>Enter</kbd> para gerar · <kbd>Shift</kbd>+<kbd>Enter</kbd> para quebrar linha
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: PDF -->
+    <section class="panel-right">
+      <div class="pdf-toolbar">
+        <div class="tb-left">
+          <span class="pdf-badge">PDF</span>
+          <div>
+            <div class="tb-name" id="tbName">Relatório</div>
+            <div class="tb-sub" id="tbSub">Pré-visualização do documento</div>
+          </div>
+        </div>
+        <div class="tb-right">
+          <button class="btn" id="saveBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            Salvar
+          </button>
+          <button class="btn btn-primary" id="downloadBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Baixar PDF
+          </button>
+        </div>
+      </div>
+      <div class="pdf-stage" id="pdfStage"></div>
+    </section>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ════════════════════════ STATE ════════════════════════ */
+const SCHOOL = { name: "Escola Municipal Monteiro Lobato", gov: "Rede Municipal de Ensino" };
+const TODAY = new Date('2026-06-14T12:00:00');
+const fmtDate = (d) => d.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+
+let students = [];
+let activeId = null;
+let uid = 1;
+
+/* ──────────── Report generation (simulated) ──────────── */
+const FIRST = (s) => (s||'').trim().split(/\s+/)[0] || '';
+
+function extractName(text) {
+  const m = text.match(/\b(?:chama-se|nome[ée]|aluno[ae]?\s*[:é]?|[oa]\s+)?([A-ZÀ-Ý][a-zà-ÿ]{2,})\b/);
+  if (m && m[1]) return m[1];
+  const w = text.trim().split(/\s+/)[0];
+  return w ? w.charAt(0).toUpperCase()+w.slice(1).toLowerCase() : 'Aluno(a)';
+}
+
+// keyword → phrase fragments, by area
+const TRAITS = {
+  social: [
+    { k:/particip|engaj|ativ/i, p:"participa ativamente das atividades propostas, demonstrando entusiasmo e disposição para contribuir com a turma" },
+    { k:/tímid|introvert|quiet|caladdo|reserv/i, p:"apresenta um perfil mais reservado, observando com atenção antes de se expor, e vem ganhando confiança gradualmente nas interações" },
+    { k:/agitad|inquiet|hiperativ|dispers/i, p:"demonstra bastante energia e vem desenvolvendo, com apoio, estratégias para canalizar sua disposição nos momentos de concentração" },
+    { k:/amig|sociáv|sociav|companh|colega|coleguinha/i, p:"relaciona-se de forma afetuosa e cooperativa com os colegas, sendo bem acolhido(a) no grupo" },
+    { k:/ajud|generos|solidári|solidari|cuid/i, p:"mostra-se solidário(a) e atento(a) às necessidades dos colegas, oferecendo ajuda espontaneamente" },
+  ],
+  cognitive: [
+    { k:/matemátic|matematic|númer|numer|cálcul|calcul|conta/i, p:"No campo lógico-matemático, vem consolidando o raciocínio com números e situações-problema, com avanços consistentes a cada etapa" },
+    { k:/leitur|ler|lê\b/i, p:"Demonstra grande interesse pela leitura, ampliando o repertório e a fluência de maneira notável" },
+    { k:/escrit|escrev|redaç|redac|letra/i, p:"Na produção escrita, organiza ideias com clareza crescente e cuida da apresentação do texto" },
+    { k:/curios|pergunt|investig|explor/i, p:"Manifesta curiosidade investigativa, formulando perguntas pertinentes e buscando compreender o porquê das coisas" },
+    { k:/concentr|atenç|atenc|foco/i, p:"Vem desenvolvendo a atenção e o foco nas tarefas, sustentando a concentração por períodos cada vez maiores" },
+    { k:/dificuldade|dificil|difícil|desafio|custa|trava/i, p:"Diante dos desafios, beneficia-se de apoio individualizado e de retomadas, respondendo bem às intervenções pedagógicas" },
+  ],
+  language: [
+    { k:/fala|oral|express|comunic|conversa/i, p:"comunica-se com desenvoltura, expressando ideias e sentimentos de forma cada vez mais articulada" },
+    { k:/criativ|imaginaç|imaginac|desenh|art|histór|histor/i, p:"revela criatividade e imaginação fértil, especialmente nas atividades artísticas e de expressão" },
+    { k:/vocabulár|vocabular|palavr/i, p:"amplia continuamente o vocabulário e emprega novas palavras nas conversas do dia a dia" },
+  ]
+};
+
+function pick(area, text) {
+  const hits = TRAITS[area].filter(t => t.k.test(text)).map(t => t.p);
+  return hits;
+}
+
+function buildReport(text, name) {
+  const social = pick('social', text);
+  const cog = pick('cognitive', text);
+  const lang = pick('language', text);
+
+  const socialBody = social.length
+    ? `${name} ${social.join('. Além disso, ')}. O desenvolvimento socioemocional caminha de forma positiva, com avanços perceptíveis na autorregulação e na convivência em grupo.`
+    : `${name} apresenta um desenvolvimento socioemocional adequado à faixa etária, integrando-se à rotina escolar e construindo vínculos afetivos saudáveis com colegas e educadores.`;
+
+  const cogBody = cog.length
+    ? `${cog.join('. ')}. De modo geral, ${name} acompanha os objetivos de aprendizagem previstos para o período, com progressos que merecem ser celebrados.`
+    : `Quanto à aprendizagem, ${name} acompanha de maneira satisfatória os conteúdos trabalhados, demonstrando evolução nas habilidades de leitura, escrita e raciocínio lógico ao longo do bimestre.`;
+
+  const langBody = lang.length
+    ? `Na dimensão da linguagem e expressão, ${name} ${lang.join('; ')}.`
+    : `Na dimensão da linguagem, ${name} expressa-se com clareza crescente, participando das rodas de conversa e ampliando seu repertório de forma natural.`;
+
+  return {
+    school: SCHOOL.name,
+    title: "Relatório Pedagógico Individual",
+    studentName: name,
+    meta: {
+      turma: "3º Ano A — Ensino Fundamental",
+      periodo: "2º Bimestre / 2026",
+      professora: "Profª Helena Carvalho",
+      data: fmtDate(TODAY)
+    },
+    note: text.trim(),
+    sections: [
+      { label: "Desenvolvimento Socioemocional", body: socialBody },
+      { label: "Aprendizagem e Cognição", body: cogBody },
+      { label: "Linguagem e Comunicação", body: langBody },
+      { label: "Considerações Finais", body: `${name} tem demonstrado um percurso de desenvolvimento consistente. Recomenda-se a continuidade do acompanhamento, valorizando suas conquistas e oferecendo apoio nos pontos que ainda demandam atenção. A parceria entre escola e família segue fundamental para o pleno florescimento da criança.` }
+    ],
+    eval: { "Participação": 4, "Autonomia": 3, "Convívio social": 5 }
+  };
+}
+
+/* ──────────── seed students ──────────── */
+function seed() {
+  const ana = {
+    id: uid++, name: "Ana", messages: [], report: null
+  };
+  ana.messages = [
+    { role:'assistant', text:"Olá! Descreva a criança em linguagem natural — personalidade, desempenho, pontos fortes e desafios — e eu gero um relatório pedagógico completo, pronto para revisar e baixar." },
+    { role:'teacher', text:"Ana é uma menina muito participativa e curiosa, adora ler e ajudar os colegas. Tem facilidade com escrita, mas ainda apresenta dificuldade em matemática, especialmente nas contas de subtração." },
+    { role:'assistant', text:"Pronto! Gerei o relatório de Ana. Você pode editar qualquer campo diretamente no documento ao lado." }
+  ];
+  ana.report = buildReport(ana.messages[1].text, "Ana");
+
+  const lucas = { id: uid++, name: "Lucas", messages: [], report: null };
+  lucas.messages = [
+    { role:'assistant', text:"Olá! Descreva a criança em linguagem natural — personalidade, desempenho, pontos fortes e desafios — e eu gero um relatório pedagógico completo, pronto para revisar e baixar." },
+    { role:'teacher', text:"Lucas é um menino bastante agitado, cheio de energia, mas muito criativo nos desenhos e histórias. Tem dificuldade de concentração em tarefas longas e às vezes é tímido nas rodas de conversa." },
+    { role:'assistant', text:"Pronto! Gerei o relatório de Lucas. Você pode editar qualquer campo diretamente no documento ao lado." }
+  ];
+  lucas.report = buildReport(lucas.messages[1].text, "Lucas");
+  lucas.report.eval = { "Participação": 3, "Autonomia": 4, "Convívio social": 4 };
+
+  students = [ana, lucas];
+  activeId = ana.id;
+}
+
+/* ════════════════════════ RENDER ════════════════════════ */
+const $ = (s) => document.querySelector(s);
+const active = () => students.find(s => s.id === activeId);
+
+function initials(n){ const p=(n||'').trim().split(/\s+/); return ((p[0]?.[0]||'')+(p[1]?.[0]||'')).toUpperCase() || '?'; }
+
+function renderTabs() {
+  const bar = $('#tabsBar');
+  bar.innerHTML = '';
+  students.forEach(s => {
+    const t = document.createElement('button');
+    t.className = 'tab' + (s.id===activeId ? ' active' : '');
+    t.innerHTML = `<span class="tab-avatar">${initials(s.name)}</span><span>${s.name}</span>`;
+    t.onclick = () => switchTo(s.id);
+    bar.appendChild(t);
+  });
+  const add = document.createElement('button');
+  add.className = 'tab-add';
+  add.title = 'Adicionar aluno';
+  add.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
+  add.onclick = addStudent;
+  bar.appendChild(add);
+}
+
+function renderChat() {
+  const sc = $('#chatScroll');
+  const s = active();
+  sc.innerHTML = '';
+  if (!s) return;
+  s.messages.forEach(m => sc.appendChild(bubble(m)));
+  if (s.generating) {
+    const g = document.createElement('div');
+    g.className = 'gen-badge';
+    g.innerHTML = `Gerando relatório <span class="gen-dots"><i></i><i></i><i></i></span>`;
+    sc.appendChild(g);
+  }
+  sc.scrollTop = sc.scrollHeight;
+}
+
+function bubble(m) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + (m.role==='teacher' ? 'teacher' : 'assistant');
+  if (m.role === 'assistant') {
+    wrap.innerHTML = `<span class="avatar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 5 5 .5-3.8 3.3L16.5 16 12 13.2 7.5 16l1.3-5.2L5 7.5 10 7z"/></svg></span><div class="stack"><div class="bubble">${esc(m.text)}</div></div>`;
+  } else {
+    wrap.innerHTML = `<div class="stack"><div class="bubble">${esc(m.text)}</div></div>`;
+  }
+  return wrap;
+}
+function esc(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+/* ──────────── PDF render ──────────── */
+function renderPDF(opts={}) {
+  const stage = $('#pdfStage');
+  const s = active();
+
+  // toolbar
+  $('#tbName').textContent = s ? `Relatório — ${s.name}` : 'Relatório';
+  $('#headerStudent').textContent = s ? s.name : '—';
+  const hasReport = s && s.report;
+  $('#tbSub').textContent = hasReport ? 'Documento pronto · clique nos campos para editar' : 'Nenhum documento gerado';
+  $('#saveBtn').disabled = !hasReport;
+  $('#downloadBtn').disabled = !hasReport;
+
+  if (!s) { stage.innerHTML = emptyHTML(); return; }
+  if (s.generating) { stage.innerHTML = skeletonHTML(); return; }
+  if (!s.report) { stage.innerHTML = emptyHTML(); return; }
+
+  stage.innerHTML = sheetHTML(s.report);
+  const sheet = stage.querySelector('.sheet');
+  if (opts.appear) sheet.classList.add('appear');
+  wireEditable(s);
+  wireStars(s);
+}
+
+function emptyHTML() {
+  return `<div class="empty">
+    <div class="ill"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></div>
+    <h3>Nenhum relatório ainda</h3>
+    <p>Descreva o aluno no chat ao lado em linguagem natural. O relatório pedagógico será gerado aqui automaticamente.</p>
+    <div class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Comece pelo painel da esquerda</div>
+  </div>`;
+}
+
+function skeletonHTML() {
+  let secs = '';
+  for (let i=0;i<3;i++){
+    secs += `<div style="margin-bottom:22px">
+      <div class="skel-line" style="width:38%;height:8px"></div>
+      <div class="skel-line" style="width:100%"></div>
+      <div class="skel-line" style="width:96%"></div>
+      <div class="skel-line" style="width:88%;margin-bottom:0"></div>
+    </div>`;
+  }
+  return `<div class="sheet">
+    <div style="display:flex;gap:13px;align-items:center;padding-bottom:14px;border-bottom:2px solid var(--blue-deep)">
+      <div class="skel-line" style="width:42px;height:42px;border-radius:50%;margin:0"></div>
+      <div style="flex:1"><div class="skel-line" style="width:60%"></div><div class="skel-line" style="width:35%;height:8px;margin-bottom:0"></div></div>
+    </div>
+    <div class="skel-center" style="margin:24px 0 22px">
+      <div class="skel-line" style="width:55%;height:16px"></div>
+      <div class="skel-line" style="width:30%;height:11px;margin-bottom:0"></div>
+    </div>
+    <div class="skel-line" style="width:100%;height:46px;border-radius:6px;margin-bottom:26px"></div>
+    ${secs}
+  </div>`;
+}
+
+function metaCell(label, key, val){
+  return `<div class="meta-cell"><div class="label">${label}</div><div class="value editable" data-meta="${key}" contenteditable="true">${esc(val)}</div></div>`;
+}
+
+function sheetHTML(r) {
+  const stars = (n, on) => {
+    let h=''; for(let i=1;i<=5;i++){ h+=`<span class="star ${i<=on?'on':''}" data-crit="${esc(n)}" data-v="${i}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.8.6-5.2 4.5 1.6 6.7L12 16.9 5.9 20.6l1.6-6.7L2.3 8.9l6.8-.6z"/></svg></span>`; } return h;
+  };
+  const evalRows = Object.entries(r.eval).map(([c,v]) =>
+    `<div class="eval-row"><span class="crit">${esc(c)}</span><span class="stars">${stars(c,v)}</span></div>`
+  ).join('');
+
+  const sections = r.sections.map((sec,i) =>
+    `<div class="section">
+       <div class="sec-label">${esc(sec.label)}</div>
+       <div class="sec-body editable" data-sec="${i}" contenteditable="true">${esc(sec.body)}</div>
+     </div>`
+  ).join('');
+
+  return `<div class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-logo">${initials(SCHOOL.name).slice(0,2)}</div>
+      <div class="sheet-school">
+        <span class="name editable" data-field="school" contenteditable="true">${esc(r.school)}</span>
+        <span class="gov">${esc(SCHOOL.gov)}</span>
+      </div>
+    </div>
+
+    <div class="sheet-title"><h2 class="editable" data-field="title" contenteditable="true">${esc(r.title)}</h2></div>
+    <div class="sheet-student"><span class="pref">Aluno(a)</span><span class="editable" data-field="studentName" contenteditable="true">${esc(r.studentName)}</span></div>
+
+    <div class="meta-grid">
+      ${metaCell('Turma','turma',r.meta.turma)}
+      ${metaCell('Período letivo','periodo',r.meta.periodo)}
+      ${metaCell('Professora(o)','professora',r.meta.professora)}
+      ${metaCell('Data de emissão','data',r.meta.data)}
+    </div>
+
+    ${sections}
+
+    <div class="section"><div class="sec-label">Avaliação por área</div></div>
+    <div class="eval-block">${evalRows}</div>
+
+    <div class="sheet-foot">
+      <div class="sign"><div class="line"></div><div class="who"><b>${esc(r.meta.professora)}</b>Professora responsável</div></div>
+      <div class="foot-date">${SCHOOL.name.split(' ').slice(0,2).join(' ')}<br/>${esc(r.meta.data)}</div>
+    </div>
+  </div>`;
+}
+
+/* ──────────── editable + stars wiring ──────────── */
+function wireEditable(s) {
+  $('#pdfStage').querySelectorAll('.editable[contenteditable]').forEach(el => {
+    el.addEventListener('blur', () => {
+      const txt = el.textContent.trim();
+      if (el.dataset.field) s.report[el.dataset.field] = txt;
+      else if (el.dataset.meta) s.report.meta[el.dataset.meta] = txt;
+      else if (el.dataset.sec !== undefined) s.report.sections[+el.dataset.sec].body = txt;
+      if (el.dataset.field === 'studentName') { s.name = FIRST(txt) || s.name; renderTabs(); $('#headerStudent').textContent = s.name; $('#tbName').textContent = `Relatório — ${s.name}`; }
+    });
+  });
+}
+function wireStars(s) {
+  $('#pdfStage').querySelectorAll('.star').forEach(st => {
+    st.addEventListener('click', () => {
+      const crit = st.dataset.crit, v = +st.dataset.v;
+      s.report.eval[crit] = v;
+      const row = st.closest('.stars');
+      row.querySelectorAll('.star').forEach(x => x.classList.toggle('on', +x.dataset.v <= v));
+    });
+  });
+}
+
+/* ════════════════════════ ACTIONS ════════════════════════ */
+function switchTo(id) {
+  if (id === activeId) return;
+  activeId = id;
+  renderTabs();
+  renderChat();
+  // fade + slide transition on PDF
+  const stage = $('#pdfStage');
+  stage.style.transition = 'opacity .15s, transform .15s';
+  stage.style.opacity = '0';
+  stage.style.transform = 'translateX(8px)';
+  setTimeout(() => {
+    renderPDF();
+    stage.style.opacity = '1';
+    stage.style.transform = 'none';
+  }, 150);
+}
+
+function addStudent() {
+  const s = { id: uid++, name: `Aluno ${students.length+1}`, generating:false, report:null,
+    messages: [{ role:'assistant', text:"Novo aluno criado. Descreva a criança — personalidade, desempenho, pontos fortes e desafios — e eu gero o relatório pedagógico." }] };
+  students.push(s);
+  activeId = s.id;
+  renderTabs(); renderChat(); renderPDF();
+  $('#composerInput').focus();
+}
+
+function send() {
+  const input = $('#composerInput');
+  const text = input.value.trim();
+  const s = active();
+  if (!text || !s || s.generating) return;
+
+  s.messages.push({ role:'teacher', text });
+  input.value = ''; autoGrow(input);
+  s.generating = true;
+  renderChat(); renderPDF();
+
+  setTimeout(() => {
+    const name = (s.name && !/^Aluno/.test(s.name)) ? s.name : extractName(text);
+    s.name = name;
+    s.report = buildReport(text, name);
+    s.generating = false;
+    s.messages.push({ role:'assistant', text:`Pronto! Gerei o relatório de ${name}. Você pode editar qualquer campo diretamente no documento ao lado.` });
+    renderTabs(); renderChat(); renderPDF({ appear:true });
+  }, 1900);
+}
+
+/* toast */
+let toastT;
+function toast(msg) {
+  const wrap = $('#toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> ${esc(msg)}`;
+  wrap.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(()=>t.remove(), 260); }, 2800);
+}
+
+/* ════════════════════════ EVENTS ════════════════════════ */
+function autoGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,130)+'px'; }
+
+function bindEvents() {
+  const input = $('#composerInput'), box = $('#composerBox');
+  input.addEventListener('input', () => { autoGrow(input); $('#sendBtn').disabled = !input.value.trim(); });
+  input.addEventListener('focus', () => box.classList.add('focused'));
+  input.addEventListener('blur', () => box.classList.remove('focused'));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  $('#sendBtn').addEventListener('click', send);
+  $('#sendBtn').disabled = true;
+
+  $('#saveBtn').addEventListener('click', () => { if(!active()?.report) return; toast('Relatório salvo'); });
+  $('#downloadBtn').addEventListener('click', () => {
+    if(!active()?.report) return;
+    toast('Preparando PDF para download');
+    setTimeout(() => window.print(), 500);
+  });
+}
+
+/* ════════════════════════ INIT ════════════════════════ */
+seed();
+renderTabs();
+renderChat();
+renderPDF();
+bindEvents();
+</script>
+</body>
+</html>
+
+<style id="__om-edit-overrides">
+#chatScroll >.teacher .bubble { background-color: rgb(117, 149, 146) !important }
+#pdfStage .sheet-logo { background-color: rgb(117, 149, 146) !important }
+</style>
