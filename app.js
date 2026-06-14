@@ -32,9 +32,22 @@ const API_CONFIG = {
   },
 };
 
-const SYSTEM_PROMPT = `Você é um especialista em pedagogia brasileira, auxiliando professores a redigir relatórios individuais de alunos do ensino fundamental.
+function getCurrentPeriod() {
+  const month = new Date().getMonth() + 1;
+  const year  = new Date().getFullYear();
+  if (month <= 3)  return `1º Bimestre ${year}`;
+  if (month <= 6)  return `2º Bimestre ${year}`;
+  if (month <= 9)  return `3º Bimestre ${year}`;
+  return `4º Bimestre ${year}`;
+}
+
+function getSystemPrompt() {
+  return `Você é um especialista em pedagogia brasileira, auxiliando professores a redigir relatórios individuais de alunos do ensino fundamental.
 
 Quando receber uma descrição de um aluno, gere um relatório pedagógico completo em português formal, adequado para documento escolar oficial.
+
+Data de hoje: ${getCurrentDate()}
+Período letivo atual: ${getCurrentPeriod()}
 
 IMPORTANTE: Responda SOMENTE com um JSON válido, sem texto antes ou depois. Sem blocos de código, sem markdown, apenas o JSON puro.
 
@@ -43,7 +56,7 @@ Formato do JSON:
   "studentName": "Nome completo do aluno",
   "class": "Ex: 3º Ano A",
   "age": "Ex: 8 anos",
-  "period": "Ex: 2º Bimestre 2026",
+  "period": "${getCurrentPeriod()}",
   "teacher": "A preencher",
   "geral": "Parágrafo sobre desenvolvimento geral (3-4 frases formais)",
   "academico": "Parágrafo sobre desempenho acadêmico (3-4 frases formais)",
@@ -53,6 +66,7 @@ Formato do JSON:
 }
 
 Use linguagem formal, empática e construtiva. Nunca use linguagem negativa — transforme dificuldades em áreas de desenvolvimento.`;
+}
 
 const DOM = {
   tabsBar:       () => document.getElementById('tabsBar'),
@@ -113,7 +127,7 @@ async function callAnthropic(messages) {
     body: JSON.stringify({
       model: API_CONFIG.anthropic.model,
       max_tokens: 1800,
-      system: SYSTEM_PROMPT,
+      system: getSystemPrompt(),
       messages,
     }),
   });
@@ -145,7 +159,7 @@ async function callGemini(messages) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      systemInstruction: { parts: [{ text: getSystemPrompt() }] },
       contents,
       generationConfig: { maxOutputTokens: 1800, temperature: 0.4 },
     }),
@@ -221,7 +235,7 @@ function buildReportFromParsed(parsed, fallbackName) {
     studentName: parsed.studentName || fallbackName,
     meta: {
       turma:      parsed.class    || '—',
-      periodo:    parsed.period   || '—',
+      periodo:    parsed.period   || getCurrentPeriod(),
       professora: parsed.teacher  || 'Maria Aparecida',
       data:       getCurrentDate(),
     },
