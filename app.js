@@ -844,7 +844,7 @@ async function downloadPDF() {
 }
 
 /* ── Word Download ── */
-async function downloadWord() {
+function downloadWord() {
   const s = activeStudent();
   if (!s || !s.report) {
     showToast('Gere um relatório antes de baixar.', true);
@@ -856,88 +856,71 @@ async function downloadWord() {
 
   try {
     const r = s.report;
-    const {
-      Document, Paragraph, TextRun, AlignmentType,
-      Table, TableRow, TableCell, WidthType, BorderStyle, Packer,
-    } = window.docx;
 
-    const noBorder = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
-    const cellBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
+    const sectionsHTML = (r.sections || []).map(sec => `
+      <p style="font-size:12pt;font-weight:bold;color:#2A6B67;margin:14pt 0 4pt 0;">${esc(sec.label)}</p>
+      <p style="font-size:11pt;text-align:justify;margin:0 0 8pt 0;">${esc(sec.body)}</p>
+    `).join('');
 
-    const metaRow = (labels, values) => new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: [
-        new TableRow({ children: labels.map(l => new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: l, bold: true, size: 18 })] })] })) }),
-        new TableRow({ children: values.map(v => new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: v || '—', size: 18 })] })] })) }),
-      ],
-    });
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office"
+            xmlns:w="urn:schemas-microsoft-com:office:word"
+            xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="UTF-8">
+        <meta name=ProgId content=Word.Document>
+        <!--[if gte mso 9]>
+        <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml>
+        <![endif]-->
+        <style>
+          body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1A1A1A; margin: 2cm; }
+          table { width: 100%; border-collapse: collapse; }
+          td { border: 1px solid #bbb; padding: 5pt 8pt; font-size: 10pt; }
+        </style>
+      </head>
+      <body>
+        <p style="text-align:center;font-size:16pt;font-weight:bold;margin:0 0 4pt 0;">${esc(r.school)}</p>
+        <p style="text-align:center;font-size:10pt;color:#666;margin:0 0 16pt 0;">${esc(SCHOOL.gov)}</p>
+        <p style="text-align:center;font-size:14pt;font-weight:bold;margin:0 0 14pt 0;">${esc(r.title)}</p>
+        <p style="font-size:12pt;margin:0 0 12pt 0;"><b>Aluno(a):</b> ${esc(r.studentName)}</p>
+        <table>
+          <tr>
+            <td style="font-weight:bold;background:#f0f0f0;">Turma</td>
+            <td style="font-weight:bold;background:#f0f0f0;">Período letivo</td>
+            <td style="font-weight:bold;background:#f0f0f0;">Professora(o)</td>
+            <td style="font-weight:bold;background:#f0f0f0;">Data de emissão</td>
+          </tr>
+          <tr>
+            <td>${esc(r.meta.turma || '—')}</td>
+            <td>${esc(r.meta.periodo || '—')}</td>
+            <td>${esc(r.meta.professora || '—')}</td>
+            <td>${esc(r.meta.data || '—')}</td>
+          </tr>
+        </table>
+        ${sectionsHTML}
+        <p style="margin-top:24pt;font-size:10pt;">${esc(r.meta.data || '')}</p>
+        <table style="margin-top:40pt;border:none;">
+          <tr>
+            <td style="border:none;text-align:center;width:50%;padding-top:8pt;">
+              <p style="margin:0;">________________________________</p>
+              <p style="margin:4pt 0 0 0;font-weight:bold;">${esc(r.meta.professora || '')}</p>
+              <p style="margin:2pt 0 0 0;font-size:10pt;">Professora responsável</p>
+            </td>
+            <td style="border:none;text-align:center;width:50%;padding-top:8pt;">
+              <p style="margin:0;">________________________________</p>
+              <p style="margin:4pt 0 0 0;font-size:10pt;">Assinatura dos Pais/Responsáveis</p>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>`;
 
-    const sigTable = new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: [
-        new TableRow({
-          children: [
-            new TableCell({
-              borders: cellBorders,
-              children: [
-                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun('_'.repeat(32))] }),
-                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: r.meta.professora || '', bold: true })] }),
-                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Professora responsável', size: 18 })] }),
-              ],
-            }),
-            new TableCell({
-              borders: cellBorders,
-              children: [
-                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun('_'.repeat(32))] }),
-                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Assinatura dos Pais/Responsáveis', size: 18 })] }),
-              ],
-            }),
-          ],
-        }),
-      ],
-    });
-
-    const doc = new Document({
-      sections: [{
-        children: [
-          // Cabeçalho
-          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 }, children: [new TextRun({ text: r.school, bold: true, size: 28 })] }),
-          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 }, children: [new TextRun({ text: SCHOOL.gov, size: 20, color: '666666' })] }),
-
-          // Título
-          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 }, children: [new TextRun({ text: r.title, bold: true, size: 26 })] }),
-
-          // Aluno
-          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: 'Aluno(a): ', bold: true, size: 22 }), new TextRun({ text: r.studentName, size: 22 })] }),
-
-          // Meta
-          metaRow(
-            ['Turma', 'Período letivo', 'Professora(o)', 'Data de emissão'],
-            [r.meta.turma, r.meta.periodo, r.meta.professora, r.meta.data],
-          ),
-          new Paragraph({ text: '' }),
-
-          // Seções
-          ...(r.sections || []).flatMap(sec => [
-            new Paragraph({ spacing: { before: 240, after: 60 }, children: [new TextRun({ text: sec.label, bold: true, size: 22 })] }),
-            new Paragraph({ spacing: { after: 160 }, children: [new TextRun({ text: sec.body, size: 20 })] }),
-          ]),
-
-          // Rodapé
-          new Paragraph({ text: '' }),
-          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: r.meta.data, size: 18 })] }),
-          new Paragraph({ text: '' }),
-          sigTable,
-        ],
-      }],
-    });
-
-    const blob = await Packer.toBlob(doc);
+    const blob = new Blob([html], { type: 'application/msword;charset=utf-8' });
     const safeName = (r.studentName || 'relatorio').replace(/\s+/g, '-').toLowerCase();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `relatorio-${safeName}.docx`;
+    a.download = `relatorio-${safeName}.doc`;
     a.click();
     URL.revokeObjectURL(url);
     showToast('Word gerado com sucesso!');

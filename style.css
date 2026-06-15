@@ -347,6 +347,7 @@ body {
   border: 1px solid var(--border);
   background: #fff;
   color: var(--text);
+  white-space: nowrap;
   transition: background .15s, border-color .15s, transform .08s;
 }
 .btn:hover { background: #f5f5f5; border-color: #D6CFC2; }
