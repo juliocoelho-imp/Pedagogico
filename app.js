@@ -56,7 +56,6 @@ Formato do JSON:
   "period": "Ex: 1º Semestre 2026",
   "teacher": "A preencher",
   "geral": "Parágrafo sobre desenvolvimento geral (3-4 frases formais)",
-  "academico": "Parágrafo sobre desempenho acadêmico (3-4 frases formais)",
   "social": "Parágrafo sobre socialização e comportamento (2-3 frases formais)",
   "pontos": "Parágrafo sobre pontos fortes (2-3 frases formais)",
   "obs": "Observações e recomendações para o próximo período (2-3 frases)"
@@ -238,11 +237,10 @@ function buildReportFromParsed(parsed, fallbackName) {
       data:       getCurrentDate(),
     },
     sections: [
-      { label: 'Desenvolvimento Geral',               body: parsed.geral     || '' },
-      { label: 'Desempenho Acadêmico',                body: parsed.academico || '' },
-      { label: 'Socialização e Comportamento',        body: parsed.social    || '' },
-      { label: 'Pontos Fortes',                       body: parsed.pontos    || '' },
-      { label: 'Observações e Recomendações',         body: parsed.obs       || '' },
+      { label: 'Desenvolvimento Geral',               body: parsed.geral  || '' },
+      { label: 'Socialização e Comportamento',        body: parsed.social || '' },
+      { label: 'Pontos Fortes',                       body: parsed.pontos || '' },
+      { label: 'Observações e Recomendações',         body: parsed.obs    || '' },
     ],
   };
 }
@@ -858,8 +856,26 @@ function downloadWord() {
     const r = s.report;
 
     const sectionsHTML = (r.sections || []).map(sec => `
-      <p style="font-size:12pt;font-weight:bold;color:#2A6B67;margin:14pt 0 4pt 0;">${esc(sec.label)}</p>
-      <p style="font-size:11pt;text-align:justify;margin:0 0 8pt 0;">${esc(sec.body)}</p>
+      <tr>
+        <td style="
+          width:130pt;
+          font-size:9.5pt;
+          font-weight:bold;
+          color:#2A6B67;
+          background:#f4f8f8;
+          border:1px solid #c8d8d7;
+          padding:6pt 8pt;
+          vertical-align:top;
+        ">${esc(sec.label)}</td>
+        <td style="
+          font-size:9.5pt;
+          text-align:justify;
+          border:1px solid #c8d8d7;
+          padding:6pt 9pt;
+          vertical-align:top;
+          line-height:1.45;
+        ">${esc(sec.body)}</td>
+      </tr>
     `).join('');
 
     const html = `
@@ -869,53 +885,113 @@ function downloadWord() {
       <head>
         <meta charset="UTF-8">
         <meta name=ProgId content=Word.Document>
-        <!--[if gte mso 9]>
-        <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml>
-        <![endif]-->
+        <!--[if gte mso 9]><xml>
+          <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+          </w:WordDocument>
+        </xml><![endif]-->
         <style>
-          body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1A1A1A; margin: 2cm; }
-          table { width: 100%; border-collapse: collapse; }
-          td { border: 1px solid #bbb; padding: 5pt 8pt; font-size: 10pt; }
+          @page {
+            size: 21cm 29.7cm;
+            margin: 1.8cm 2cm 1.8cm 2cm;
+            mso-header-margin: 0cm;
+            mso-footer-margin: 0cm;
+          }
+          body {
+            font-family: Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            color: #1A1A1A;
+            margin: 0;
+            mso-margin-top-alt: auto;
+            mso-margin-bottom-alt: auto;
+          }
+          p { margin: 0; padding: 0; }
+          table { border-collapse: collapse; width: 100%; }
+          td { font-size: 10pt; }
+          .divider {
+            border: none;
+            border-top: 2px solid #2A6B67;
+            margin: 6pt 0;
+          }
         </style>
       </head>
       <body>
-        <p style="text-align:center;font-size:16pt;font-weight:bold;margin:0 0 4pt 0;">${esc(r.school)}</p>
-        <p style="text-align:center;font-size:10pt;color:#666;margin:0 0 16pt 0;">${esc(SCHOOL.gov)}</p>
-        <p style="text-align:center;font-size:14pt;font-weight:bold;margin:0 0 14pt 0;">${esc(r.title)}</p>
-        <p style="font-size:12pt;margin:0 0 12pt 0;"><b>Aluno(a):</b> ${esc(r.studentName)}</p>
+
+        <!-- CABEÇALHO -->
+        <table style="margin-bottom:4pt;">
+          <tr>
+            <td style="width:48pt;text-align:center;vertical-align:middle;border:none;padding:0 8pt 0 0;">
+              <div style="
+                width:42pt; height:42pt;
+                background:#2A6B67;
+                border-radius:50%;
+                display:inline-block;
+                text-align:center;
+                line-height:42pt;
+                font-size:14pt;
+                font-weight:bold;
+                color:#fff;
+                mso-line-height-rule:exactly;
+              ">${esc(initials(r.school).slice(0,2))}</div>
+            </td>
+            <td style="vertical-align:middle;border:none;padding:0;">
+              <p style="font-size:13pt;font-weight:bold;color:#1A1A1A;margin:0 0 2pt 0;">${esc(r.school)}</p>
+              <p style="font-size:9pt;color:#666;margin:0;">${esc(SCHOOL.gov)}</p>
+            </td>
+          </tr>
+        </table>
+        <hr class="divider">
+
+        <!-- TÍTULO -->
+        <p style="text-align:center;font-size:13pt;font-weight:bold;color:#1A1A1A;margin:6pt 0 4pt 0;">${esc(r.title)}</p>
+
+        <!-- ALUNO -->
+        <p style="font-size:11pt;margin:0 0 8pt 0;">
+          <span style="color:#666;font-size:9pt;">Aluno(a)</span><br>
+          <b>${esc(r.studentName)}</b>
+        </p>
+
+        <!-- META -->
+        <table style="margin-bottom:10pt;">
+          <tr>
+            <td style="border:1px solid #c8d8d7;background:#f4f8f8;padding:4pt 8pt;font-size:8.5pt;font-weight:bold;color:#2A6B67;width:25%;">Turma</td>
+            <td style="border:1px solid #c8d8d7;background:#f4f8f8;padding:4pt 8pt;font-size:8.5pt;font-weight:bold;color:#2A6B67;width:25%;">Período letivo</td>
+            <td style="border:1px solid #c8d8d7;background:#f4f8f8;padding:4pt 8pt;font-size:8.5pt;font-weight:bold;color:#2A6B67;width:25%;">Professora(o)</td>
+            <td style="border:1px solid #c8d8d7;background:#f4f8f8;padding:4pt 8pt;font-size:8.5pt;font-weight:bold;color:#2A6B67;width:25%;">Data de emissão</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #c8d8d7;padding:4pt 8pt;font-size:9pt;">${esc(r.meta.turma || '—')}</td>
+            <td style="border:1px solid #c8d8d7;padding:4pt 8pt;font-size:9pt;">${esc(r.meta.periodo || '—')}</td>
+            <td style="border:1px solid #c8d8d7;padding:4pt 8pt;font-size:9pt;">${esc(r.meta.professora || '—')}</td>
+            <td style="border:1px solid #c8d8d7;padding:4pt 8pt;font-size:9pt;">${esc(r.meta.data || '—')}</td>
+          </tr>
+        </table>
+
+        <!-- SEÇÕES -->
+        <table style="margin-bottom:12pt;">${sectionsHTML}</table>
+
+        <!-- RODAPÉ -->
+        <p style="font-size:9pt;color:#666;margin:0 0 16pt 0;">${esc(r.meta.data || '')}</p>
         <table>
           <tr>
-            <td style="font-weight:bold;background:#f0f0f0;">Turma</td>
-            <td style="font-weight:bold;background:#f0f0f0;">Período letivo</td>
-            <td style="font-weight:bold;background:#f0f0f0;">Professora(o)</td>
-            <td style="font-weight:bold;background:#f0f0f0;">Data de emissão</td>
-          </tr>
-          <tr>
-            <td>${esc(r.meta.turma || '—')}</td>
-            <td>${esc(r.meta.periodo || '—')}</td>
-            <td>${esc(r.meta.professora || '—')}</td>
-            <td>${esc(r.meta.data || '—')}</td>
-          </tr>
-        </table>
-        ${sectionsHTML}
-        <p style="margin-top:24pt;font-size:10pt;">${esc(r.meta.data || '')}</p>
-        <table style="margin-top:40pt;border:none;">
-          <tr>
-            <td style="border:none;text-align:center;width:50%;padding-top:8pt;">
-              <p style="margin:0;">________________________________</p>
-              <p style="margin:4pt 0 0 0;font-weight:bold;">${esc(r.meta.professora || '')}</p>
-              <p style="margin:2pt 0 0 0;font-size:10pt;">Professora responsável</p>
+            <td style="border:none;text-align:center;width:50%;padding-top:20pt;">
+              <p style="margin:0;font-size:9pt;color:#aaa;">________________________________________________</p>
+              <p style="margin:3pt 0 0 0;font-size:9.5pt;font-weight:bold;">${esc(r.meta.professora || '')}</p>
+              <p style="margin:1pt 0 0 0;font-size:8.5pt;color:#666;">Professora responsável</p>
             </td>
-            <td style="border:none;text-align:center;width:50%;padding-top:8pt;">
-              <p style="margin:0;">________________________________</p>
-              <p style="margin:4pt 0 0 0;font-size:10pt;">Assinatura dos Pais/Responsáveis</p>
+            <td style="border:none;text-align:center;width:50%;padding-top:20pt;">
+              <p style="margin:0;font-size:9pt;color:#aaa;">________________________________________________</p>
+              <p style="margin:3pt 0 0 0;font-size:8.5pt;color:#666;">Assinatura dos Pais/Responsáveis</p>
             </td>
           </tr>
         </table>
+
       </body>
       </html>`;
 
-    const blob = new Blob([html], { type: 'application/msword;charset=utf-8' });
+    const blob = new Blob(['﻿' + html], { type: 'application/msword;charset=utf-8' });
     const safeName = (r.studentName || 'relatorio').replace(/\s+/g, '-').toLowerCase();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
