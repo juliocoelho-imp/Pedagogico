@@ -73,6 +73,7 @@ const DOM = {
   sendBtn:       () => document.getElementById('sendBtn'),
   saveBtn:       () => document.getElementById('saveBtn'),
   downloadBtn:   () => document.getElementById('downloadBtn'),
+  wordBtn:       () => document.getElementById('wordBtn'),
   pdfStage:      () => document.getElementById('pdfStage'),
   tbName:        () => document.getElementById('tbName'),
   tbSub:         () => document.getElementById('tbSub'),
@@ -358,6 +359,7 @@ function renderPDF(opts = {}) {
     : 'Nenhum documento gerado';
   DOM.saveBtn().disabled = !hasReport;
   DOM.downloadBtn().disabled = !hasReport;
+  DOM.wordBtn().disabled = !hasReport;
 
   if (!s) { stage.innerHTML = emptyHTML(); return; }
   if (s.generating) { stage.innerHTML = skeletonHTML(); return; }
@@ -841,6 +843,111 @@ async function downloadPDF() {
   }
 }
 
+/* ── Word Download ── */
+async function downloadWord() {
+  const s = activeStudent();
+  if (!s || !s.report) {
+    showToast('Gere um relatório antes de baixar.', true);
+    return;
+  }
+
+  collectEdits();
+  showToast('Gerando Word…');
+
+  try {
+    const r = s.report;
+    const {
+      Document, Paragraph, TextRun, AlignmentType,
+      Table, TableRow, TableCell, WidthType, BorderStyle, Packer,
+    } = window.docx;
+
+    const noBorder = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+    const cellBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
+
+    const metaRow = (labels, values) => new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({ children: labels.map(l => new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: l, bold: true, size: 18 })] })] })) }),
+        new TableRow({ children: values.map(v => new TableCell({ borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: v || '—', size: 18 })] })] })) }),
+      ],
+    });
+
+    const sigTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              borders: cellBorders,
+              children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun('_'.repeat(32))] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: r.meta.professora || '', bold: true })] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Professora responsável', size: 18 })] }),
+              ],
+            }),
+            new TableCell({
+              borders: cellBorders,
+              children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun('_'.repeat(32))] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Assinatura dos Pais/Responsáveis', size: 18 })] }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    });
+
+    const doc = new Document({
+      sections: [{
+        children: [
+          // Cabeçalho
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 }, children: [new TextRun({ text: r.school, bold: true, size: 28 })] }),
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 }, children: [new TextRun({ text: SCHOOL.gov, size: 20, color: '666666' })] }),
+
+          // Título
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 }, children: [new TextRun({ text: r.title, bold: true, size: 26 })] }),
+
+          // Aluno
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: 'Aluno(a): ', bold: true, size: 22 }), new TextRun({ text: r.studentName, size: 22 })] }),
+
+          // Meta
+          metaRow(
+            ['Turma', 'Período letivo', 'Professora(o)', 'Data de emissão'],
+            [r.meta.turma, r.meta.periodo, r.meta.professora, r.meta.data],
+          ),
+          new Paragraph({ text: '' }),
+
+          // Seções
+          ...(r.sections || []).flatMap(sec => [
+            new Paragraph({ spacing: { before: 240, after: 60 }, children: [new TextRun({ text: sec.label, bold: true, size: 22 })] }),
+            new Paragraph({ spacing: { after: 160 }, children: [new TextRun({ text: sec.body, size: 20 })] }),
+          ]),
+
+          // Rodapé
+          new Paragraph({ text: '' }),
+          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: r.meta.data, size: 18 })] }),
+          new Paragraph({ text: '' }),
+          sigTable,
+        ],
+      }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    const safeName = (r.studentName || 'relatorio').replace(/\s+/g, '-').toLowerCase();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `relatorio-${safeName}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Word gerado com sucesso!');
+
+  } catch (err) {
+    console.error('Erro ao gerar Word:', err);
+    showToast('Erro ao gerar Word. Veja o console para detalhes.', true);
+  }
+}
+
 /* ── Modal de API Keys ── */
 function openModal() {
   DOM.apiKeyAnthropicInput().value = getApiKey('anthropic');
@@ -890,6 +997,7 @@ function setupEvents() {
   DOM.sendBtn().addEventListener('click', sendMessage);
   DOM.saveBtn().addEventListener('click', saveReport);
   DOM.downloadBtn().addEventListener('click', downloadPDF);
+  DOM.wordBtn().addEventListener('click', downloadWord);
 
   DOM.btnSettings().addEventListener('click', openModal);
   DOM.modalCancel().addEventListener('click', closeModal);
